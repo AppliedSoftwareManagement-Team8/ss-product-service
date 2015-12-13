@@ -1,7 +1,7 @@
-var express = require('express');
-var router = express.Router();
-var mongoose = require('mongoose');
-var Product = require('../models/product');
+var express = require('express'),
+	router = express.Router(),
+	mongoose = require('mongoose'),
+	Product = require('../models/product');
 
 
 mongoose.connect('mongodb://localhost/ss-product');
@@ -22,7 +22,7 @@ router.post('/', function (req, res, next) {
     // save the product and check for errors
     product.save(function (err) {
         if (err)
-            res.status(err.status || 500).json(err);
+            return res.status(err.status || 500).json(err);
         res.status(201, "Created").json({message: 'Product was created!'});
     });
 });
@@ -32,7 +32,7 @@ router.get('/', function (req, res, next) {
     Product.count({categoryID: req.params.categoryId}, function (err, count) {
         Product.find(function (err, products) {
             if (err)
-                res.status(err.status || 500).json(err);
+                return res.status(err.status || 500).json(err);
             var data = {count: count, products: products};
             res.status(200).json(data);
         });
@@ -40,7 +40,7 @@ router.get('/', function (req, res, next) {
 });
 
 /* GET a product page by Category */
-router.get('/products/:categoryId/:pageNum', function (req, res, next) {
+router.get('/category/:categoryId/:pageNum', function (req, res, next) {
     Product.count({categoryID: req.params.categoryId}, function (err, count) {
         Product.find({categoryID: req.params.categoryId}).
         skip(10 * parseInt(req.params.pageNum)).
@@ -49,7 +49,7 @@ router.get('/products/:categoryId/:pageNum', function (req, res, next) {
         lean().
         exec(function (err, products) {
             if (err)
-                res.status(err.status || 500).json(err);
+                return res.status(err.status || 500).json(err);
             var data = {count: count, products: products};
             res.status(200).json(data);
         });
@@ -67,7 +67,7 @@ router.get('/search/:query/:pageNum', function (req, res, next) {
         lean().
         exec(function (err, products) {
             if (err)
-                res.status(err.status || 500).json(err);
+                return res.status(err.status || 500).json(err);
             var data = {count: count, products: products};
             res.status(200).json(data);
         });
@@ -75,24 +75,14 @@ router.get('/search/:query/:pageNum', function (req, res, next) {
 
 });
 
-
 /* GET all Products of a user by ID */
-router.get('/products/:ownerID', function (req, res, next) {
+router.get('/owner/:ownerID', function (req, res, next) {
     Product.find().
     where('ownerID').equals(req.params.ownerID).
     sort('-createdDate').
     exec(function (err, products) {
         if (err)
-            res.status(err.status || 500).json(err);
-        res.status(200).json(products);
-    });
-});
-
-/* GET all Products. */
-router.get('/', function (req, res, next) {
-    Product.find(function (err, products) {
-        if (err)
-            res.status(err.status || 500).json(err);
+            return res.status(err.status || 500).json(err);
         res.status(200).json(products);
     });
 });
@@ -101,7 +91,7 @@ router.get('/', function (req, res, next) {
 router.get('/:id', function (req, res, next) {
     Product.findById(req.params.id, function (err, product) {
         if (err)
-            res.status(err.status || 500).json(err);
+            return res.status(err.status || 500).json(err);
         res.status(200).json(product);
     });
 });
@@ -110,7 +100,7 @@ router.get('/:id', function (req, res, next) {
 router.put('/:id', function (req, res, next) {
     Product.findById(req.params.id, function (err, product) {
         if (err)
-            res.status(err.status || 500).json(err);
+            return res.status(err.status || 500).json(err);
 
         product.name = req.body.name;
         product.categoryID = req.body.categoryID;
@@ -123,7 +113,7 @@ router.put('/:id', function (req, res, next) {
 
         product.save(function (err) {
             if (err)
-                res.status(err.status || 500).json(err);
+                return res.status(err.status || 500).json(err);
             res.status(200).json({message: 'Product has been updated!'});
         });
 
@@ -136,7 +126,7 @@ router.delete('/:id', function (req, res, next) {
         _id: req.params.id
     }, function (err, product) {
         if (err)
-            res.status(err.status || 500).json(err);
+            return res.status(err.status || 500).json(err);
         res.status(200).json({message: 'Product was successfully deleted!'});
     });
 });

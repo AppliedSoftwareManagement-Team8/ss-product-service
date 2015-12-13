@@ -1,11 +1,9 @@
-var express = require('express');
-var path = require('path');
-var logger = require('morgan');
-var bodyParser = require('body-parser');
-
-var products = require('./routes/products');
-
-var app = express();
+var express = require('express'),
+	path = require('path'),
+	logger = require('morgan'),
+	bodyParser = require('body-parser'),
+	products = require('./routes/products'),
+	app = express();
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
