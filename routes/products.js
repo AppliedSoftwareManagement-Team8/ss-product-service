@@ -3,7 +3,6 @@ var express = require('express'),
 	mongoose = require('mongoose'),
 	Product = require('../models/product');
 
-
 mongoose.connect('mongodb://localhost/ss-product');
 
 /* Create a new Product */
@@ -20,32 +19,20 @@ router.post('/', function (req, res, next) {
     product.specifications = req.body.specifications;
 
     // save the product and check for errors
-    product.save(function (err) {
+    product.save(function (err, product) {
         if (err)
             return res.status(err.status || 500).json(err);
-        res.status(201, "Created").json({message: 'Product was created!'});
+        res.status(201, "Created").json(product);
     });
 });
 
-/* GET all Products. */
-router.get('/', function (req, res, next) {
-    Product.count({categoryID: req.params.categoryId}, function (err, count) {
-        Product.find(function (err, products) {
-            if (err)
-                return res.status(err.status || 500).json(err);
-            var data = {count: count, products: products};
-            res.status(200).json(data);
-        });
-    });
-});
-
-/* GET a product page by Category */
+/* GET a product page by Category and newest */
 router.get('/category/:categoryId/:pageNum', function (req, res, next) {
     Product.count({categoryID: req.params.categoryId}, function (err, count) {
         Product.find({categoryID: req.params.categoryId}).
-        skip(10 * parseInt(req.params.pageNum)).
-        limit(10).
-        sort('-createdDate').
+        skip(12 * parseInt(req.params.pageNum)).
+        limit(12).
+        sort(("sort" in req.query) ? (req.query.sort === 'createdDate') ? '-' + req.query.sort: req.query.sort : '-createdDate').
         lean().
         exec(function (err, products) {
             if (err)
@@ -56,14 +43,14 @@ router.get('/category/:categoryId/:pageNum', function (req, res, next) {
     });
 });
 
-/* GET a product page by search query */
+/* GET a product page by search query and newest */
 router.get('/search/:query/:pageNum', function (req, res, next) {
     var reg = new RegExp(".*" + req.params.query + ".*", "i");
     Product.count({name: reg}, function (err, count) {
         Product.find({name: reg}).
-        skip(10 * parseInt(req.params.pageNum)).
-        limit(10).
-        sort('-createdDate').
+        skip(12 * parseInt(req.params.pageNum)).
+        limit(12).
+        sort(("sort" in req.query) ? (req.query.sort === 'createdDate') ? '-' + req.query.sort: req.query.sort : '-createdDate').
         lean().
         exec(function (err, products) {
             if (err)
